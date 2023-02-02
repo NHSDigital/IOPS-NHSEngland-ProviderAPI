@@ -13,7 +13,6 @@ import io.swagger.v3.oas.models.media.MediaType
 
 import io.swagger.v3.oas.models.media.StringSchema
 import io.swagger.v3.oas.models.parameters.Parameter
-import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.servers.Server
@@ -25,9 +24,9 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
-    var MHD = ""
-    var ITI67 = "Find Documents"
-    var ITI68 = "Retrieve Document"
+
+    var HEALTH_ADMIN = "Health Admin"
+    var DOCUMENTS = "Documents"
 
     @Bean
     open fun customOpenAPI(
@@ -59,13 +58,13 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
 
         oas.addTagsItem(
             io.swagger.v3.oas.models.tags.Tag()
-                .name(MHD + " " + ITI67)
+                .name(HEALTH_ADMIN)
                 .description("")
         )
 
         oas.addTagsItem(
             io.swagger.v3.oas.models.tags.Tag()
-                .name(MHD + " " + ITI68)
+                .name(DOCUMENTS)
                 .description("")
         )
 
@@ -77,8 +76,8 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
         var binaryItem = PathItem()
             .get(
                 Operation()
-                    .addTagsItem(MHD + " " + ITI68)
-                    .summary("Get raw document (eRS Wayfinder implied by NRLF)")
+                    .addTagsItem(DOCUMENTS)
+                    .summary("Get raw document (Local/Regional: Wayfinder + implied by NRLF)")
                     .responses(getApiResponsesBinary())
                     .addParametersItem(Parameter()
                         .name("id")
@@ -97,39 +96,38 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
         var documentReferenceItem = PathItem()
             .get(
                 Operation()
-                    .addTagsItem(MHD + " " + ITI67)
-                    .summary("Search DocumentReference (Wayfinder eRS NRLF)")
-                    .description("Wayfinder eRS NRLF")
+                    .addTagsItem(DOCUMENTS)
+                    .summary("Search DocumentReference (Local/Regional: Wayfinder, National: eRS NRLF)")
+                    .description("This is only a minimum set of query parameters to be supported.")
                     .responses(getApiResponses())
                     .addParametersItem(Parameter()
                         .name("patient:identifier")
                         .`in`("query")
                         .required(true)
                         .style(Parameter.StyleEnum.SIMPLE)
-                        .description("Who/what is the subject of the document")
+                        .description("Who/what is the subject of the document. `https://fhir.nhs.uk/Id/nhs-number|{nhsNumber}` ")
                         .schema(StringSchema())
-                        .example("073eef49-81ee-4c2e-893b-bc2e4efd2630")
+                        .example("https://fhir.nhs.uk/Id/nhs-number%7C4857773456")
                     )
                     .addParametersItem(Parameter()
-                        .name("date")
+                        .name("subject")
                         .`in`("query")
                         .required(false)
                         .style(Parameter.StyleEnum.SIMPLE)
-                        .description("When this document reference was created")
+                        .description("This is the STU3 NRL way of searching. Unsure of R4 version `https://demographics.spineservices.nhs.uk/STU3/Patient/{nhsNumber}`")
                         .schema(StringSchema())
+                        .example("https://demographics.spineservices.nhs.uk/STU3/Patient/4857773456")
                     )
-
-
             )
         oas.path("/FHIR/R4/DocumentReference",documentReferenceItem)
 
 
-        // Task
-        var taskItem = PathItem()
+        // Appointment
+        var appointmentItem = PathItem()
             .get(
                 Operation()
-                    .addTagsItem("Task")
-                    .summary("Search Task (BARS Wayfinder)")
+                    .addTagsItem(HEALTH_ADMIN)
+                    .summary("Search Appointment (Local/Regional: BARS? + Wayfinder)")
                     .description("BARS Wayfinder")
                     .responses(getApiResponses())
                     .addParametersItem(Parameter()
@@ -137,7 +135,27 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .`in`("query")
                         .required(true)
                         .style(Parameter.StyleEnum.SIMPLE)
-                        .description("Who/what is the subject of the Task")
+                        .description("Who/what is the subject of the Appointment. `https://fhir.nhs.uk/Id/nhs-number|{nhsNumber}` Note BARS example is invalid FHIR `https://fhir.nhs.uk/Id/nhs-number:{nhsNumber}`")
+                        .schema(StringSchema())
+                        .example("https://fhir.nhs.uk/Id/nhs-number%7C4857773456")
+                    )
+            )
+        oas.path("/FHIR/R4/Appointment",appointmentItem)
+
+        // Task
+        var taskItem = PathItem()
+            .get(
+                Operation()
+                    .addTagsItem(HEALTH_ADMIN)
+                    .summary("Search Task (Supplier: Wayfinder \n" + " National: EPS, GP Connect PFS and eRS)")
+                    .description("Local: Wayfinder \n National: EPS and eRS")
+                    .responses(getApiResponses())
+                    .addParametersItem(Parameter()
+                        .name("patient:identifier")
+                        .`in`("query")
+                        .required(true)
+                        .style(Parameter.StyleEnum.SIMPLE)
+                        .description("Who/what is the subject of the Task `https://fhir.nhs.uk/Id/nhs-number|{nhsNumber}`")
                         .schema(StringSchema())
                         .example("https://fhir.nhs.uk/Id/nhs-number%7C4857773456")
                     )
@@ -148,8 +166,8 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
         var serviceRequestItem = PathItem()
             .get(
                 Operation()
-                    .addTagsItem("ServiceRequest")
-                    .summary("Search ServiceRequest (BARS eRS(Wayfinder))")
+                    .addTagsItem(HEALTH_ADMIN)
+                    .summary("Search ServiceRequest (Local/Regional: BARS?, National: eRS(for Wayfinder))")
                     .description("BARS eRS(Wayfinder)")
                     .responses(getApiResponses())
                     .addParametersItem(Parameter()
@@ -157,33 +175,15 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .`in`("query")
                         .required(true)
                         .style(Parameter.StyleEnum.SIMPLE)
-                        .description("Who/what is the subject of the ServiceRequest")
+                        .description("Who/what is the subject of the ServiceRequest `https://fhir.nhs.uk/Id/nhs-number|{nhsNumber}`")
                         .schema(StringSchema())
-                        .example("https://fhir.nhs.uk/Id/nhs-number%7C4857773456")
+                        .example("https://fhir.nhs.uk/Id/nhs-number%7C9912003888")
                     )
             )
         oas.path("/FHIR/R4/ServiceRequest",serviceRequestItem)
 
 
-        // Appointment
-        var appointmentItem = PathItem()
-            .get(
-                Operation()
-                    .addTagsItem("Appointment")
-                    .summary("Search Appointment (BARS Wayfinder)")
-                    .description("BARS Wayfinder")
-                    .responses(getApiResponses())
-                    .addParametersItem(Parameter()
-                        .name("patient:identifier")
-                        .`in`("query")
-                        .required(true)
-                        .style(Parameter.StyleEnum.SIMPLE)
-                        .description("Who/what is the subject of the Appointment")
-                        .schema(StringSchema())
-                        .example("https://fhir.nhs.uk/Id/nhs-number%7C4857773456")
-                    )
-            )
-        oas.path("/FHIR/R4/Appointment",appointmentItem)
+
 
 
         return oas
