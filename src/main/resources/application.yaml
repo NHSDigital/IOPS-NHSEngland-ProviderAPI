@@ -1,0 +1,33 @@
+server:
+  port: 9007
+  tomcat:
+    threads:
+      max: 10
+
+management:
+  health:
+    elasticsearch:
+        enabled: false
+  endpoints:
+    web.exposure:
+      include: "*"
+
+fhir:
+  server:
+    name: NHS England Provider API
+    baseUrl: https://3cdzg7kbj4.execute-api.eu-west-2.amazonaws.com/poc/documentsharing
+    version: 1.0.8
+
+###Remote terminology validation:
+
+##Example without auth:
+#terminology:
+#  url: https://r4.ontoserver.csiro.au/fhir
+
+##Example with auth:
+#terminology:
+#  url: https://ontology.nhs.uk/authoring/fhir/
+#  authorization:
+#    tokenUrl: https://ontology.nhs.uk/authorisation/auth/realms/nhs-digital-terminology/protocol/openid-connect/token
+#    clientId: test
+#    clientSecret: test
