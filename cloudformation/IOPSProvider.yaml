@@ -244,5 +244,37 @@ Resources:
           CidrIp: "0.0.0.0/0"
           IpProtocol: "-1"
 
+  ECSService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "svc-fhir-provider-api"
+      Cluster: !GetAtt ECSCluster.Arn
+      LoadBalancers:
+        - TargetGroupArn: !Ref ElasticLoadBalancingV2TargetGroup
+          ContainerName: "fhir-provider-api-container"
+          ContainerPort: 9007
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref ECSTaskDefinition
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "ENABLED"
+          SecurityGroups:
+            - !Ref EC2SecurityGroup
+          Subnets:
+            - "subnet-0d786d325c26ca068"
+            - "subnet-0ffaa3af23683e8b1"
+      HealthCheckGracePeriodSeconds: 20
+      SchedulingStrategy: "REPLICA"
+      DeploymentController:
+        Type: "ECS"
+
 
 
