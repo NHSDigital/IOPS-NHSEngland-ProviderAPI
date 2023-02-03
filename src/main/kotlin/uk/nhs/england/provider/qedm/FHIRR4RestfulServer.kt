@@ -15,7 +15,9 @@ import javax.servlet.annotation.WebServlet
 class FHIRR4RestfulServer(
     @Qualifier("R4") fhirContext: FhirContext,
     public val fhirServerProperties: FHIRServerProperties,
-
+    val appointmentProvider: AppointmentProvider,
+    val taskProvider: TaskProvider,
+    val serviceRequestProvider: ServiceRequestProvider,
     val documentReferenceProvider:  DocumentReferenceProvider,
     val binaryProvider: BinaryProvider
 
@@ -28,6 +30,9 @@ class FHIRR4RestfulServer(
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
+        registerProvider(appointmentProvider)
+        registerProvider(taskProvider)
+        registerProvider(serviceRequestProvider)
         registerProvider(documentReferenceProvider)
         registerProvider(binaryProvider)
 

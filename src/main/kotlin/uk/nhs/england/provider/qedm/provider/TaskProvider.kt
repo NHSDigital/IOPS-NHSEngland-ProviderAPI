@@ -1,44 +1,41 @@
 package uk.nhs.england.provider.qedm.provider
 
 import ca.uhn.fhir.rest.annotation.*
-import ca.uhn.fhir.rest.api.MethodOutcome
-import ca.uhn.fhir.rest.param.DateRangeParam
-import ca.uhn.fhir.rest.param.StringParam
 import ca.uhn.fhir.rest.param.TokenParam
 import ca.uhn.fhir.rest.server.IResourceProvider
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
 import org.hl7.fhir.r4.model.*
 import org.springframework.stereotype.Component
-import uk.nhs.england.provider.qedm.awsProvider.AWSDocumentReference
 import uk.nhs.england.provider.qedm.awsProvider.AWSPatient
 import uk.nhs.england.provider.qedm.interceptor.CognitoAuthInterceptor
 import javax.servlet.http.HttpServletRequest
 
 @Component
-class DocumentReferenceProvider(var cognitoAuthInterceptor: CognitoAuthInterceptor,
-val awsPatient: AWSPatient) : IResourceProvider {
-    override fun getResourceType(): Class<DocumentReference> {
-        return DocumentReference::class.java
+class TaskProvider(var cognitoAuthInterceptor: CognitoAuthInterceptor,
+                   val awsPatient: AWSPatient,
+    ) : IResourceProvider {
+    override fun getResourceType(): Class<Task> {
+        return Task::class.java
     }
 
    
     @Search
     fun search(
         httpRequest : HttpServletRequest,
-        @RequiredParam(name  = "patient:identifier") nhsNumber : TokenParam
+        @RequiredParam(name = "patient:identifier") nhsNumber : TokenParam,
 
-    ): List<DocumentReference> {
-        val documents = mutableListOf<DocumentReference>()
+    ): List<Task> {
+        val tasks = mutableListOf<Task>()
         if (nhsNumber.value == null || nhsNumber.system == null) throw UnprocessableEntityException("Malformed patient identifier parameter")
         val patient = awsPatient.getPatient(Identifier().setSystem(nhsNumber.system).setValue(nhsNumber.value))
         if (patient != null) {
-            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart)
+            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.id)
             if (resource != null && resource is Bundle) {
                 for (entry in resource.entry) {
-                    if (entry.hasResource() && entry.resource is DocumentReference) documents.add(entry.resource as DocumentReference)
+                    if (entry.hasResource() && entry.resource is Task) tasks.add(entry.resource as Task)
                 }
             }
         }
-        return documents
+        return tasks
     }
 }
