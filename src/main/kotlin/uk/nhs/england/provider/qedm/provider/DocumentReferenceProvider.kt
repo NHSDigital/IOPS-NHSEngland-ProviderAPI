@@ -1,15 +1,11 @@
 package uk.nhs.england.provider.qedm.provider
 
 import ca.uhn.fhir.rest.annotation.*
-import ca.uhn.fhir.rest.api.MethodOutcome
-import ca.uhn.fhir.rest.param.DateRangeParam
-import ca.uhn.fhir.rest.param.StringParam
 import ca.uhn.fhir.rest.param.TokenParam
 import ca.uhn.fhir.rest.server.IResourceProvider
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
 import org.hl7.fhir.r4.model.*
 import org.springframework.stereotype.Component
-import uk.nhs.england.provider.qedm.awsProvider.AWSDocumentReference
 import uk.nhs.england.provider.qedm.awsProvider.AWSPatient
 import uk.nhs.england.provider.qedm.interceptor.CognitoAuthInterceptor
 import javax.servlet.http.HttpServletRequest

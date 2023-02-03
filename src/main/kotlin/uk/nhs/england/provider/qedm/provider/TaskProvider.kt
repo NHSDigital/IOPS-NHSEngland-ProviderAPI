@@ -29,7 +29,7 @@ class TaskProvider(var cognitoAuthInterceptor: CognitoAuthInterceptor,
         if (nhsNumber.value == null || nhsNumber.system == null) throw UnprocessableEntityException("Malformed patient identifier parameter")
         val patient = awsPatient.getPatient(Identifier().setSystem(nhsNumber.system).setValue(nhsNumber.value))
         if (patient != null) {
-            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.id)
+            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart)
             if (resource != null && resource is Bundle) {
                 for (entry in resource.entry) {
                     if (entry.hasResource() && entry.resource is Task) tasks.add(entry.resource as Task)

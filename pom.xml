@@ -11,7 +11,7 @@
     <groupId>uk.nhs.england</groupId>
     <artifactId>iops-fhir-nhse-qedm</artifactId>
     <version>1.0.0</version>
-    <name>iops-fhir-mhd</name>
+    <name>iops-fhir-provider-api</name>
     <description>IOPS FHIR MHD</description>
 
     <properties>
@@ -170,7 +170,7 @@
     </dependencies>
 
     <build>
-        <finalName>fhir-nhse-qedm</finalName>
+        <finalName>fhir-provider-api</finalName>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
