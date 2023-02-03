@@ -26,5 +26,5 @@ aws ecr get-login-password --region eu-west-2 | docker login --username AWS --pa
 
 Command is
 
-aws cloudformation deploy --template-file C:\Development\NHSDigital\validation-service-fhir-r4\cloudfront\IOPSValidation.yaml --stack-name test-stack
+aws cloudformation deploy --template-file C:\Development\NHSDigital\IOPS-NHSEngland-ProviderAPI\cloudformation\IOPSProvider.yaml --stack-name fhir-provider-stack
 

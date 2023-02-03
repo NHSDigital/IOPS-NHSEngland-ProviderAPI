@@ -10,40 +10,12 @@ Parameters:
     Description: "Ontology Server Client Secret"
     Type: "String"
     Default: "5678"
-  AWSapiKey:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  AWSclientId:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  AWSpass:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  AWStokenUrl:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  AWSuser:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  CDRfhirServer:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
-  FHIRServerBaseUrl:
-    Description: "Ontology Server Client Secret"
-    Type: "String"
-    Default: "5678"
 
 Resources:
   ECSCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
-      ClusterName: "cloud-fhir-r4"
+      ClusterName: "fhir-r4"
       CapacityProviders:
         - "FARGATE"
         - "FARGATE_SPOT"
@@ -62,21 +34,6 @@ Resources:
               Value: !Ref OntoClientSecret
             - Name: "terminology.authorization.tokenUrl"
               Value: "https://ontology.nhs.uk/authorisation/auth/realms/nhs-digital-terminology/protocol/openid-connect/token"
-            - Name: "aws.apiKey"
-              Value: !Ref AWSapiKey
-            - Name: "aws.clientId"
-              Value: !Ref AWSclientId
-            - Name: "aws.pass"
-              Value: !Ref AWSpass
-            - Name: "aws.tokenUrl"
-              Value: !Ref AWStokenUrl
-            - Name: "aws.user"
-              Value: !Ref AWSuser
-            - Name: "cdr.fhirServer"
-              Value: !Ref CDRfhirServer
-            - Name: "fhir.server.baseUrl"
-              Value: !Ref FHIRServerBaseUrl
-
           Essential: true
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/fhir-provider-api:1.0.0"
           LogConfiguration:
@@ -88,8 +45,8 @@ Resources:
           MemoryReservation: 2028
           Name: "fhir-provider-api-container"
           PortMappings:
-            - ContainerPort: 9007
-              HostPort: 9007
+            - ContainerPort: 9001
+              HostPort: 9001
               Protocol: "tcp"
       Family: "fhir-provider-api-task"
       ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole"
@@ -104,7 +61,7 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 20
       HealthCheckPath: "/FHIR/R4/metadata"
-      Port: 9007
+      Port: 9001
       Protocol: "HTTP"
       HealthCheckPort: "traffic-port"
       HealthCheckProtocol: "HTTP"
@@ -219,9 +176,9 @@ Resources:
       VpcId: "vpc-014d22eaa2ae874ab"
       SecurityGroupIngress:
         - CidrIp: "0.0.0.0/0"
-          FromPort: 9007
+          FromPort: 9001
           IpProtocol: "tcp"
-          ToPort: 9007
+          ToPort: 9001
 
   EC2SecurityGroup2:
     Type: "AWS::EC2::SecurityGroup"
@@ -236,13 +193,44 @@ Resources:
       SecurityGroupIngress:
         -
           CidrIp: "0.0.0.0/0"
-          FromPort: 9007
+          FromPort: 9001
           IpProtocol: "tcp"
-          ToPort: 9007
+          ToPort: 9001
       SecurityGroupEgress:
         -
           CidrIp: "0.0.0.0/0"
           IpProtocol: "-1"
 
+  ECSService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      ServiceName: "svc-fhir-provider-api"
+      Cluster: !GetAtt ECSCluster.Arn
+      LoadBalancers:
+        - TargetGroupArn: !Ref ElasticLoadBalancingV2TargetGroup
+          ContainerName: "fhir-provider-api-container"
+          ContainerPort: 9001
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      PlatformVersion: "LATEST"
+      TaskDefinition: !Ref ECSTaskDefinition
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "ENABLED"
+          SecurityGroups:
+            - !Ref EC2SecurityGroup
+          Subnets:
+            - "subnet-0d786d325c26ca068"
+            - "subnet-0ffaa3af23683e8b1"
+      HealthCheckGracePeriodSeconds: 20
+      SchedulingStrategy: "REPLICA"
+      DeploymentController:
+        Type: "ECS"
 
 
