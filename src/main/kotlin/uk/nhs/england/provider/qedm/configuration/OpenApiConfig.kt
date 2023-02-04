@@ -43,7 +43,12 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                                 "## FHIR Implementation Guides"
                                 + "\n\n [UK Core Implementation Guide (0.5.1)](https://simplifier.net/guide/ukcoreimplementationguide0.5.0-stu1/home?version=current)"
                                 + "\n\n [NHS England Implementation Guide (2.6.0)](https://simplifier.net/guide/nhsdigital?version=2.6.0)"
-
+                                        + "\n\n ### Test Patients "
+                                        + "\n\n | NHS Number | Patient Name | Data Source | "
+                                        + "\n |---|---|---|"
+                                        + "\n |9000000009|Julie Jones|eRS|"
+                                        + "\n |9432003812|John Reardon|Pathology/Genomics|"
+                                        + "\n |9876543210|Rachel Kanfeld|EPS|"
                     )
                     .termsOfService("http://swagger.io/terms/")
                     .license(License().name("Apache 2.0").url("http://springdoc.org"))
