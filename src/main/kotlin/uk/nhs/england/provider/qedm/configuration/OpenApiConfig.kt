@@ -41,6 +41,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                     .version(fhirServerProperties.server.version)
                     .description(
                         "All implementations and NHS England projects **MUST** adhere to NHS England profile and test this using [FHIR Validation](http://hl7.org/fhir/R4/validation.html). These profiles are all derived fro UKCore and so it is not necessary to test against UKCore."
+                                + "\n\n FHIR Profiles (Core Data Mode)"
                                 + "\n\n The scope of this profile is **England National** and does not the English NHS at local or regional level."
                                 + "\n" +
                                 "\n | HL7 FHIR | UK Core | NHS England |"
@@ -85,6 +86,28 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                                 + "\n | GP Connect Prescription Management |  |  |  |  | X | "
                                 + "\n | National Record Locator - FHIR API |   |  | X   |   |  | "
                                 + "\n\n It is believed the scope of these API's could be extended to support regional interop. This would involve adding API's covering `Encounter`, `EpisodeOfCare`, `Patient`, `Schedule` and `Slot`. A high level view of this is contained in the [HL7 FHIR Administration Module](https://www.hl7.org/fhir/r4/administration-module.html)."
+
+                                + "\n\n ## Security"
+
+                                + "\n\n For general details see [Security and authorisation](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation)"
+                                + "\n - `user-restricted` is based on [OAuth2 token-exchange flow](https://oauth.net/2/token-exchange/) and uses CIS2 or NHS Login for authentication and token. "
+                                + "\n - `application-restricted` has several forms. Most commonly used appears to be [OAuth2 client-credentials flow](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/) and uses JWT for client authentication "
+                                + "\n\n NHS England API's act as [OAuth2 Resource Servers](https://www.oauth.com/oauth2-servers/the-resource-server/)."
+                                + "\n It is not clear how the Provider API's are exposed, they may not be directly accessible and external access is via NHS England API, i.e. the OAuth2 resource server pattern is not directly used."
+                                + "\n\n ### Provider API"
+                                + "\n\n | API | application-restricted | user-restricted (practitioner) | user-restricted (citizen/patient) | "
+                                + "\n |---|---|---|---|"
+                                + "\n | Booking and Referral - FHIR API | X? |  | |"
+                                + "\n | Patient Care Aggregator - FHIR API |  |  | X (phase II) | "
+                                + "\n | National Record Locator - FHIR API | X? |  | |"
+                                + "\n\n ### NHS England API"
+                                + "\n\n | API | application-restricted | user-restricted (practitioner) | user-restricted (citizen/patient) | "
+                                + "\n |---|---|---|---|"
+                                + "\n | Booking and Referral - FHIR API | X |  | |"
+                                + "\n | Electronic Prescription Service - FHIR API |  | X |  | "
+                                + "\n | e-Referral Service Patient Care – FHIR API |  |  | X |"
+                                + "\n | GP Connect Prescription Management | X |  |  |"
+                                + "\n | National Record Locator - FHIR API | X? |  |  |"
                     )
                     .termsOfService("http://swagger.io/terms/")
                     .license(License().name("Apache 2.0").url("http://springdoc.org"))
