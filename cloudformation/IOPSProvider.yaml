@@ -78,7 +78,7 @@ Resources:
               Value: !Ref FHIRServerBaseUrl
 
           Essential: true
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/fhir-provider-api:1.0.1"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/fhir-provider-api:1.0.2"
           LogConfiguration:
             LogDriver: "awslogs"
             Options:

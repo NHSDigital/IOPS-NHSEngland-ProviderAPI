@@ -40,15 +40,16 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                     .title(fhirServerProperties.server.name)
                     .version(fhirServerProperties.server.version)
                     .description(
-                        "All implementations and NHS England projects **MUST** adhere to NHS England profile and test this using [FHIR Validation](http://hl7.org/fhir/R4/validation.html). These profiles are all derived fro UKCore and so it is not necessary to test against UKCore."
-                                + "\n\n FHIR Profiles (Core Data Mode)"
-                                + "\n\n The scope of this profile is **England National** and does not the English NHS at local or regional level."
+                                "## FHIR Profiles (Core Data Mode)"
+                                +"\n\n All implementations and NHS England projects **MUST** adhere to NHS England profile and test this using [FHIR Validation](http://hl7.org/fhir/R4/validation.html). These profiles are all derived fro UKCore and so it is not necessary to test against UKCore."
+                                + "\n\n The scope of these profiles is **England National** and does not apply to the English NHS at local or regional level."
                                 + "\n" +
                                 "\n | HL7 FHIR | UK Core | NHS England |"
                                 + "\n |-----|------|-----|"
-                                + "\n | [Appointment](http://hl7.org/fhir/R4/appointment.html)| | [NHSDigital-Appointment](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-Appointment.guide.md?version=current) |"
-                                + "\n | [ServiceRequest](http://hl7.org/fhir/R4/servicerequest.html)| | [NHSDigital-ServiceRequest](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-ServiceRequest.guide.md?version=current) |"
-                                + "\n | [Task](http://hl7.org/fhir/R4/task.html)| | [NHSDigital-Task](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-Task.guide.md?version=current) |" +
+                                + "\n | [Appointment](http://hl7.org/fhir/R4/appointment.html)| [UKCore-Appointment STU2](https://simplifier.net/guide/UK-Core-Implementation-Guide-STU2-Sequence/Home/ProfilesandExtensions/Profile-UKCore-Appointment?version=current) | [NHSDigital-Appointment](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-Appointment.guide.md?version=current) |"
+                                + "\n | [DocumentReference](http://hl7.org/fhir/R4/documentreference.html)| No UKCore STU2 | [NHSDigital-DocumentReference](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-DocumentReference.guide.md?version=current) |"
+                                + "\n | [ServiceRequest](http://hl7.org/fhir/R4/servicerequest.html)| [UKCore-ServiceRequest STU2](https://simplifier.net/guide/UK-Core-Implementation-Guide-STU2-Sequence/Home/ProfilesandExtensions/Profile-UKCore-ServiceRequest?version=current) | [NHSDigital-ServiceRequest](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-ServiceRequest.guide.md?version=current) |"
+                                + "\n | [Task](http://hl7.org/fhir/R4/task.html)| [UKCore-Task STU2](https://simplifier.net/guide/UK-Core-Implementation-Guide-STU2-Sequence/Home/ProfilesandExtensions/Profile-UKCore-Task?version=current) | [NHSDigital-Task](https://simplifier.net/guide/NHSDigital/Home/FHIRAssets/AllAssets/Profiles/NHSDigital-Task.guide.md?version=current) |" +
 
                         "\n\n ## FHIR Implementation Guides"
                                 + "\n\n All implementations and NHS England projects **SHOULD** aim to adhere to the **current** version of the following implementation guides."
