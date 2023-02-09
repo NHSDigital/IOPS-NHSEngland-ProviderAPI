@@ -17,6 +17,11 @@ val awsPatient: AWSPatient) : IResourceProvider {
         return DocumentReference::class.java
     }
 
+    @Read
+    fun read(httpRequest : HttpServletRequest, @IdParam internalId: IdType): DocumentReference? {
+        val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, null)
+        return if (resource is DocumentReference) resource else null
+    }
    
     @Search
     fun search(

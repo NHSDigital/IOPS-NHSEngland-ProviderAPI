@@ -186,7 +186,26 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
             )
         oas.path("/FHIR/R4/DocumentReference",documentReferenceItem)
 
+        // DocumentReference read
 
+        documentReferenceItem = PathItem()
+            .get(
+                Operation()
+                    .addTagsItem(DOCUMENTS)
+                    .summary("Read DocumentReference")
+                    .responses(getApiResponses())
+                    .addParametersItem(Parameter()
+                        .name("id")
+                        .`in`("path")
+                        .required(false)
+                        .style(Parameter.StyleEnum.SIMPLE)
+                        .description("The ID of the resource")
+                        .schema(StringSchema())
+                        .example("f2c0060d-e5b4-43de-9710-a899ff241a90")
+                    )
+            )
+
+        oas.path("/FHIR/R4/DocumentReference/{id}",documentReferenceItem)
         // Appointment
         var appointmentItem = PathItem()
             .get(
