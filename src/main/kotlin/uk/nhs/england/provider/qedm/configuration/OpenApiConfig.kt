@@ -27,6 +27,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
 
     var HEALTH_ADMIN = "Health Administration"
     var DOCUMENTS = "Clinical Documents"
+    var APIM = "Security and API Management"
 
     @Bean
     open fun customOpenAPI(
@@ -133,6 +134,11 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                 .description("")
         )
 
+        oas.addTagsItem(
+            io.swagger.v3.oas.models.tags.Tag()
+                .name(APIM)
+        )
+
 
 
 
@@ -140,9 +146,9 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
 
         var binaryItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(DOCUMENTS)
-                    .summary("Get raw document (Local/Regional: Wayfinder + implied by NRLF)")
+                    .summary("Get raw document (Local/Regional: Wayfinder, Waystation and implied by NRLF)")
                     .responses(getApiResponsesBinary())
                     .addParametersItem(Parameter()
                         .name("id")
@@ -153,6 +159,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .schema(StringSchema())
                         .example("3074093f-183b-47d1-a16c-ea5c101b5451")
                     )
+                )
             )
         oas.path("/FHIR/R4/Binary/{id}",binaryItem)
 
@@ -160,7 +167,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
         // DocumentReference
         var documentReferenceItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(DOCUMENTS)
                     .summary("Search DocumentReference (Local/Regional: Wayfinder, National: eRS NRLF)")
                     .description("This is only a minimum set of query parameters to be supported.")
@@ -182,7 +189,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .description("This is the STU3 NRL way of searching. Unsure of R4 version `https://demographics.spineservices.nhs.uk/STU3/Patient/{nhsNumber}`")
                         .schema(StringSchema())
 
-                    )
+                    ))
             )
         oas.path("/FHIR/R4/DocumentReference",documentReferenceItem)
 
@@ -190,7 +197,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
 
         documentReferenceItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(DOCUMENTS)
                     .summary("Read DocumentReference")
                     .responses(getApiResponses())
@@ -203,13 +210,13 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .schema(StringSchema())
                         .example("f2c0060d-e5b4-43de-9710-a899ff241a90")
                     )
-            )
+            ))
 
         oas.path("/FHIR/R4/DocumentReference/{id}",documentReferenceItem)
         // Appointment
         var appointmentItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(HEALTH_ADMIN)
                     .summary("Search Appointment (Local/Regional: BARS? + Wayfinder)")
                     .description("BARS Wayfinder")
@@ -223,13 +230,13 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .schema(StringSchema())
                         .example("https://fhir.nhs.uk/Id/nhs-number|9000000009")
                     )
-            )
+            ))
         oas.path("/FHIR/R4/Appointment",appointmentItem)
 
         // Task
         var taskItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(HEALTH_ADMIN)
                     .summary("Search Task (Supplier: Wayfinder \n" + " National: EPS, GP Connect PFS and eRS)")
                     .description("Local: Wayfinder \n National: EPS and eRS")
@@ -243,13 +250,13 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .schema(StringSchema())
                         .example("https://fhir.nhs.uk/Id/nhs-number|9000000009")
                     )
-            )
+            ))
         oas.path("/FHIR/R4/Task",taskItem)
 
         // ServiceRequest
         var serviceRequestItem = PathItem()
             .get(
-                Operation()
+                addHeaders(Operation()
                     .addTagsItem(HEALTH_ADMIN)
                     .summary("Search ServiceRequest (Local/Regional: BARS?, National: eRS(for Wayfinder))")
                     .description("")
@@ -263,9 +270,20 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                         .schema(StringSchema())
                         .example("https://fhir.nhs.uk/Id/nhs-number|9000000009")
                     )
+                )
             )
         oas.path("/FHIR/R4/ServiceRequest",serviceRequestItem)
 
+        val metadataItem = PathItem()
+            .get(
+                Operation()
+                    .addTagsItem(APIM)
+                    .summary("Get the capabilities and configurations of this FHIR Server.")
+                    .description("")
+                    .responses(getApiResponses())
+
+            )
+        oas.path("/FHIR/R4/metadata",metadataItem)
 
 
 
@@ -273,7 +291,27 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
         return oas
     }
 
-
+    fun addHeaders(operation : Operation) : Operation {
+        operation.addParametersItem(Parameter()
+            .name("Authorization")
+            .`in`("header")
+            .required(true)
+            .style(Parameter.StyleEnum.SIMPLE)
+            .description("Bearer token `Bearer {Access Token}`")
+            .schema(StringSchema())
+            .example("Bearer eyJzdWIiOiI4MmEyOTZkMC03NTJjLTRjZ")
+        )
+        operation.addParametersItem(Parameter()
+            .name("X-Correlation-ID")
+            .`in`("header")
+            .required(true)
+            .style(Parameter.StyleEnum.SIMPLE)
+            .description("A GUID value which the NHS App produces each time it calls Aggregator, which is in turn passed to all source systems. All systems are required to store the value as part of standard logging to provide traceability by unique ID in the event of debug/forensic etc. Data needs to be retained for 90 days")
+            .schema(StringSchema())
+            .example("220c91cf-5a75-4853-a3c5-35059410f3e7")
+        )
+        return operation
+    }
 
     fun getApiResponses() : ApiResponses {
 
