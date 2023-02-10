@@ -35,7 +35,7 @@ Resources:
             - Name: "terminology.authorization.tokenUrl"
               Value: "https://ontology.nhs.uk/authorisation/auth/realms/nhs-digital-terminology/protocol/openid-connect/token"
           Essential: true
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/fhir-provider-api:1.0.5"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/fhir-provider-api:1.0.7"
           LogConfiguration:
             LogDriver: "awslogs"
             Options:
