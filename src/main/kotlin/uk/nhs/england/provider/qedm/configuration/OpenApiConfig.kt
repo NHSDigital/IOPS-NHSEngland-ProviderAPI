@@ -41,7 +41,7 @@ open class OpenApiConfig(@Qualifier("R4") val ctx : FhirContext) {
                     .title(fhirServerProperties.server.name)
                     .version(fhirServerProperties.server.version)
                     .description(
-                                "## FHIR Profiles (Core Data Mode)"
+                                "## FHIR Profiles (Core Data Model)"
                                 +"\n\n All implementations and NHS England projects **MUST** adhere to NHS England profile and test this using [FHIR Validation](http://hl7.org/fhir/R4/validation.html). These profiles are all derived fro UKCore and so it is not necessary to test against UKCore."
                                 + "\n\n The scope of these profiles is **England National** and does not apply to the English NHS at local or regional level."
                                 + "\n" +
