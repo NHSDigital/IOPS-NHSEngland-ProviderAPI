@@ -13,29 +13,24 @@ import javax.servlet.http.HttpServletRequest
 @Component
 class ServiceRequestProvider(var cognitoAuthInterceptor: CognitoAuthInterceptor,
                              val awsPatient: AWSPatient,
-    ) : IResourceProvider {
-    override fun getResourceType(): Class<ServiceRequest> {
-        return ServiceRequest::class.java
-    }
+    )  {
 
    
-    @Search
+    @Search(type=ServiceRequest::class)
     fun search(
         httpRequest : HttpServletRequest,
         @RequiredParam(name = "patient:identifier") nhsNumber : TokenParam,
 
-    ): List<ServiceRequest> {
+    ): Bundle? {
         val serviceRequests = mutableListOf<ServiceRequest>()
         if (nhsNumber.value == null || nhsNumber.system == null) throw UnprocessableEntityException("Malformed patient identifier parameter")
         val patient = awsPatient.getPatient(Identifier().setSystem(nhsNumber.system).setValue(nhsNumber.value))
         if (patient != null) {
-            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart)
+            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart,"ServiceRequest")
             if (resource != null && resource is Bundle) {
-                for (entry in resource.entry) {
-                    if (entry.hasResource() && entry.resource is ServiceRequest) serviceRequests.add(entry.resource as ServiceRequest)
-                }
+                return resource
             }
         }
-        return serviceRequests
+        return null
     }
 }

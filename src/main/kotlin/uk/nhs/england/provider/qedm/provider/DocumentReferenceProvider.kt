@@ -16,14 +16,12 @@ import javax.servlet.http.HttpServletRequest
 class DocumentReferenceProvider(var cognitoAuthInterceptor: CognitoAuthInterceptor,
 val awsPatient: AWSPatient,
                               val  fhirServerProperties: FHIRServerProperties
-) : IResourceProvider {
-    override fun getResourceType(): Class<DocumentReference> {
-        return DocumentReference::class.java
-    }
+)  {
 
-    @Read
+
+    @Read(type=DocumentReference::class)
     fun read(httpRequest : HttpServletRequest, @IdParam internalId: IdType): DocumentReference? {
-        val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, null)
+        val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, null,"DocumentReference")
         return if (resource is DocumentReference) fixUrl(resource as DocumentReference) else null
     }
 
@@ -41,27 +39,28 @@ val awsPatient: AWSPatient,
         return documentReference
     }
    
-    @Search
+    @Search(type=DocumentReference::class)
     fun search(
         httpRequest : HttpServletRequest,
         @RequiredParam(name  = "patient:identifier") nhsNumber : TokenParam
 
-    ): List<DocumentReference> {
-        val documents = mutableListOf<DocumentReference>()
+    ): Bundle? {
+
         if (nhsNumber.value == null || nhsNumber.system == null) throw UnprocessableEntityException("Malformed patient identifier parameter")
         val patient = awsPatient.getPatient(Identifier().setSystem(nhsNumber.system).setValue(nhsNumber.value))
         if (patient != null) {
-            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart)
+            val resource: Resource? = cognitoAuthInterceptor.readFromUrl(httpRequest.pathInfo, "patient="+patient.idElement.idPart,"DocumentReference")
             if (resource != null && resource is Bundle) {
                 for (entry in resource.entry) {
                     if (entry.hasResource() && entry.resource is DocumentReference) {
-                        val documentReference = fixUrl(entry.resource as DocumentReference)
+                        entry.resource = fixUrl(entry.resource as DocumentReference)
 
-                        documents.add(documentReference)
+
                     }
                 }
+                return resource
             }
         }
-        return documents
+        return null
     }
 }
